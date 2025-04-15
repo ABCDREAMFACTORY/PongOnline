@@ -39,7 +39,7 @@ class Square:
         if self.player_pos.y <= 0:
             self.axis_y = 1
 
-        elif self.player_pos.y >= fenetreHauteur:  
+        elif self.player_pos.y >= fenetreHauteur-10:  
             self.axis_y = -1
 
         self.player_pos.x += self.axis_x*self.vitesse*time
@@ -65,15 +65,15 @@ class Player:
     def draw(self):
         pygame.draw.rect(screen,"white",self.rect)
     def move_up(self,time):
-        if self.rect[1] > self.rect[3]/2-10:
+        if self.rect[1] > 0:
             self.rect[1] -= self.vitesse*time
     def move_down(self,time):
-        if self.rect[1] < fenetreHauteur-self.rect[3]/2-10:
+        if self.rect[1] < fenetreHauteur-self.rect[3]:
             self.rect[1] += self.vitesse*time
 def restart(afficher):
     
-    j1.rect = [fenetreLargeur*0.1, fenetreHauteur/2-fenetreLargeur/100, fenetreLargeur/200, fenetreHauteur/25]
-    j2.rect = [fenetreLargeur*0.9, fenetreHauteur/2-fenetreLargeur/100, fenetreLargeur/200, fenetreHauteur/25]
+    j1.rect = [fenetreLargeur*0.1, fenetreHauteur/2-fenetreLargeur/100, fenetreLargeur/200, fenetreHauteur/15]
+    j2.rect = [fenetreLargeur*0.9, fenetreHauteur/2-fenetreLargeur/100, fenetreLargeur/200, fenetreHauteur/15]
     s.__init__()
     j1.draw()
     j2.draw()
