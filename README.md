@@ -1,2 +1,2 @@
 # PongOnline
-Ce projet est un pong online.
+Ce projet est un test de pong online.
