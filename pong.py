@@ -9,12 +9,13 @@ fenetreHauteur = 720  #  1000 #720
 screen = pygame.display.set_mode((fenetreLargeur, fenetreHauteur))
 clock = pygame.time.Clock()
 running = True
+font = pygame.font.Font("assets/NotoSans-Bold.ttf", 30)
 
 class Square:
     def __init__(self):
         self.player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
         self.axis_x,self.axis_y = 1,random.randint(-1,1)
-        self.vitesse = 400
+        self.vitesse = 700
     def draw(self):
         pygame.draw.circle(screen, "white", self.player_pos, 5)
 
@@ -29,10 +30,12 @@ class Square:
             self.axis_y = random.randint(-1,1)
         if self.player_pos.x >= fenetreLargeur:
             j1.score += 1
-            restart()
+            afficher = font.render(f"score: {j1.score}/{j2.score}", 1,(255,255,255))
+            restart(afficher)
         elif self.player_pos.x <= 0:
             j2.score += 1
-            restart()
+            afficher = font.render(f"score: {j1.score}/{j2.score}", 1,(255,255,255))
+            restart(afficher)
         if self.player_pos.y <= 0:
             self.axis_y = 1
 
@@ -56,7 +59,7 @@ class Square:
 
 class Player:
     def __init__(self,x):
-        self.rect = [fenetreLargeur*x, fenetreHauteur/2-fenetreLargeur/100, fenetreLargeur/200, fenetreHauteur/25]
+        self.rect = [fenetreLargeur*x, fenetreHauteur/2-fenetreLargeur/100, fenetreLargeur/200, fenetreHauteur/15]
         self.score = 0
         self.vitesse = 500
     def draw(self):
@@ -67,12 +70,17 @@ class Player:
     def move_down(self,time):
         if self.rect[1] < fenetreHauteur-self.rect[3]/2-10:
             self.rect[1] += self.vitesse*time
-def restart():
+def restart(afficher):
     
     j1.rect = [fenetreLargeur*0.1, fenetreHauteur/2-fenetreLargeur/100, fenetreLargeur/200, fenetreHauteur/25]
     j2.rect = [fenetreLargeur*0.9, fenetreHauteur/2-fenetreLargeur/100, fenetreLargeur/200, fenetreHauteur/25]
     s.__init__()
-
+    j1.draw()
+    j2.draw()
+    s.draw()
+    screen.blit(afficher, (20,20))
+    pygame.display.flip()
+    time.sleep(1)
 s = Square()
 j1 = Player(0.1)
 j2 = Player(0.9)
@@ -95,9 +103,9 @@ while running:
     if keys[pygame.K_DOWN]:
         j2.move_down(delta_time)
 
-    s.move(delta_time)
         #timer = time.time()
     s.draw()
+    s.move(delta_time)
     j1.draw()
     j2.draw()
     pygame.display.flip()
