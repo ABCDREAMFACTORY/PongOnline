@@ -1,11 +1,16 @@
 import pygame
 import time
 import random
+import math
 timer = time.time()
-
 pygame.init()
-fenetreLargeur =1280# 1720 #1280 
-fenetreHauteur = 720  #  1000 #720  
+Plein_écran = True
+if Plein_écran:
+    fenetreLargeur =1280# 1720 #1280 
+    fenetreHauteur = 720  #  1000 #720
+else:
+    fenetreLargeur =1720# 1720 #1280 
+    fenetreHauteur = 1000  #  1000 #720
 screen = pygame.display.set_mode((fenetreLargeur, fenetreHauteur))
 clock = pygame.time.Clock()
 running = True
@@ -15,7 +20,7 @@ class Square:
     def __init__(self):
         self.player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
         self.axis_x,self.axis_y = 1,random.randint(-1,1)
-        self.vitesse = 700
+        self.vitesse = math.hypot(fenetreLargeur,fenetreHauteur)*0.5#(fenetreHauteur+fenetreLargeur)*0.3#fenetreLargeur/5 + fenetreHauteur/5
     def draw(self):
         pygame.draw.circle(screen, "white", self.player_pos, 5)
 
@@ -61,7 +66,7 @@ class Player:
     def __init__(self,x):
         self.rect = [fenetreLargeur*x, fenetreHauteur/2-fenetreLargeur/100, fenetreLargeur/200, fenetreHauteur/15]
         self.score = 0
-        self.vitesse = 500
+        self.vitesse = fenetreHauteur*1#(fenetreHauteur+fenetreLargeur)*0.5
     def draw(self):
         pygame.draw.rect(screen,"white",self.rect)
     def move_up(self,time):
