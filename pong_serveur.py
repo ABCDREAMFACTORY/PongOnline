@@ -75,10 +75,12 @@ class Player:
     def move_down(self,time):
         if self.rect[1] < fenetreHauteur-self.rect[3]:
             self.rect[1] += self.vitesse*time
+
+
 def restart(afficher):
-    
-    j1.rect = [fenetreLargeur*0.1, fenetreHauteur/2-fenetreLargeur/100, fenetreLargeur/200, fenetreHauteur/15]
-    j2.rect = [fenetreLargeur*0.9, fenetreHauteur/2-fenetreLargeur/100, fenetreLargeur/200, fenetreHauteur/15]
+    screen.fill("black")
+    j1.rect = [fenetreLargeur*0.1-fenetreLargeur/200, fenetreHauteur/2, fenetreLargeur/200, fenetreHauteur/15]
+    j2.rect = [fenetreLargeur*0.9, fenetreHauteur/2, fenetreLargeur/200, fenetreHauteur/15]
     s.__init__()
     j1.draw()
     j2.draw()
@@ -86,32 +88,51 @@ def restart(afficher):
     screen.blit(afficher, (20,20))
     pygame.display.flip()
     time.sleep(1)
+
+class Menu:
+    def __init__(self):
+        self.titre = font.render("PONG",True,"white")
+        self.button_play = [fenetreLargeur/2-fenetreLargeur/20,fenetreHauteur*0.3,fenetreLargeur/10,fenetreHauteur/15]
+        self.ouvert = True
+    def load(self):
+        screen.fill("black")
+        screen.blit(self.titre,(fenetreLargeur/2-self.titre.get_width()/2,0))
+        pygame.draw.rect(screen,"white",self.button_play)
+
 s = Square()
 j1 = Player(0.1)
 j2 = Player(0.9)
-
-
+menu_list = [Menu()]
+game = False
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    screen.fill("black")
-    delta_time = clock.tick(60) / 1000.0
-    
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_z]:
-        j1.move_up(delta_time)
-    if keys[pygame.K_s]:
-        j1.move_down(delta_time)
-    if keys[pygame.K_UP]:
-        j2.move_up(delta_time)
-    if keys[pygame.K_DOWN]:
-        j2.move_down(delta_time)
+        if event.type == pygame.MOUSEBUTTONDOWN and menu_list[0].ouvert == True:
+            mouse_co = pygame.mouse.get_pos()
+            if mouse_co[0] >= menu_list[0].button_play[0] and mouse_co[0] <= menu_list[0].button_play[0] + menu_list[0].button_play[2] and mouse_co[1] >= menu_list[0].button_play[1] and mouse_co[1] <= menu_list[0].button_play[1] + menu_list[0].button_play[3]:
+                game = True
+                menu_list[0].ouvert = False
+    if menu_list[0].ouvert == True:
+        menu_list[0].load()
+    if game == True:
+        screen.fill("black")
+        delta_time = clock.tick(60) / 1000.0
+        
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_z]:
+            j1.move_up(delta_time)
+        if keys[pygame.K_s]:
+            j1.move_down(delta_time)
+        if keys[pygame.K_UP]:
+            j2.move_up(delta_time)
+        if keys[pygame.K_DOWN]:
+            j2.move_down(delta_time)
 
-        #timer = time.time()
-    s.draw()
-    s.move(delta_time)
-    j1.draw()
-    j2.draw()
+            #timer = time.time()
+        s.draw()
+        s.move(delta_time)
+        j1.draw()
+        j2.draw()
     pygame.display.flip()
     clock.tick(60)
