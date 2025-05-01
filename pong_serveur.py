@@ -2,6 +2,14 @@ import pygame
 import time
 import random
 import math
+import threading
+import socket
+
+tcpsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+tcpsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+tcpsock.bind(("",1111))
+
+
 timer = time.time()
 pygame.init()
 Plein_écran = True
@@ -14,7 +22,7 @@ else:
 screen = pygame.display.set_mode((fenetreLargeur, fenetreHauteur))
 clock = pygame.time.Clock()
 running = True
-font = pygame.font.Font("assets/NotoSans-Bold.ttf",  screen.get_width()//40)
+font = pygame.font.Font("PongOnline/assets/NotoSans-Bold.ttf",  screen.get_width()//40)
 pygame.display.set_caption("Pong")
 class Square:
     def __init__(self):
@@ -121,11 +129,23 @@ class Menu_Options:
         self.input_ip.handle_event(event)
         self.back.draw()
 
+class Menu_connection:
+    def __init__(self):
+        self.titre = font.render("Waiting for connection",True,"white")
+        self.button_back = Button(fenetreLargeur/2-fenetreLargeur/20,fenetreHauteur/2+fenetreHauteur/3,fenetreLargeur/10,fenetreHauteur/15,"white","retour",(0,0,0))
+
+        self.ouvert = False
+    def load(self):
+        screen.fill("black")
+        screen.blit(self.titre,(fenetreLargeur/2-self.titre.get_width()/2,0))
+        self.button_back.draw()
+
+
 class Button:
     def __init__(self,x,y,width,height,color,text = None,text_color = (255,255,255),taille = 25):
         self.rect = pygame.Rect(x,y,width,height)
         self.color = color
-        self.taille_text = pygame.font.Font("assets/NotoSans-Bold.ttf", taille)
+        self.taille_text = pygame.font.Font("PongOnline/assets/NotoSans-Bold.ttf", taille)
         self.text = self.taille_text.render(text, 1,text_color)
     def draw(self):
         pygame.draw.rect(screen,self.color,self.rect)
@@ -170,11 +190,35 @@ class InputBox:
         screen.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
         # Blit the rect.
         pygame.draw.rect(screen, self.color, self.rect, 2)
+ipclient = None
+class ClientThread(threading.Thread):   
+
+    def __init__(self, ip, port, clientsocket):
+
+        threading.Thread.__init__(self)
+        self.ip = ip
+        self.port = port
+        self.clientsocket = clientsocket
+
+    def run(self): 
+        command = self.clientsocket.recv(2048).decode()
+        global ipclient
+        if self.ip == None or self.ip == ipclient:
+            if command[:5] == "!actu":
+                monpackage = None #pos player1 + posball 
+                posplayer2 = command[5:]
+            elif command[:5] == "!init":
+                ipclient = self.ip
+
+ 
+        self.clientsocket.send(monpackage.encode())
+
+
 
 s = Square()
 j1 = Player(0.1)
 j2 = Player(0.9)
-menu_list = [Menu(),Menu_Options()]
+menu_list = [Menu(),Menu_Options(),Menu_connection()]
 game = False
 while running:
     for event in pygame.event.get():
@@ -189,10 +233,18 @@ while running:
                 if menu_list[0].button_option.rect.collidepoint(pygame.mouse.get_pos()):
                     menu_list[0].ouvert = False
                     menu_list[1].ouvert = True
+                if menu_list[0].button_play_lan.rect.collidepoint(pygame.mouse.get_pos()):
+                    menu_list[0].ouvert = False
+                    menu_list[2].ouvert = True                   
             if menu_list[1].ouvert == True:
                 if menu_list[1].back.rect.collidepoint(pygame.mouse.get_pos()):
                     menu_list[1].ouvert = False
                     menu_list[0].ouvert = True
+            if menu_list[2].ouvert:    
+                if menu_list[2].button_back.rect.collidepoint(pygame.mouse.get_pos()):
+                    menu_list[2].ouvert = False
+                    menu_list[0].ouvert = True    
+
         if menu_list[1].ouvert == True:
             menu_list[1].input_ip.handle_event(event)
             
@@ -200,6 +252,8 @@ while running:
         menu_list[0].load()
     if menu_list[1].ouvert == True:
         menu_list[1].load()
+    if menu_list[2].ouvert == True:
+        menu_list[2].load()
     if game == True:
         screen.fill("black")
         delta_time = clock.tick(60) / 1000.0
@@ -222,5 +276,20 @@ while running:
         s.move(delta_time)
         j1.draw()
         j2.draw()
+    if ipclient != None:
+        if keys[pygame.K_UP]:
+            j2.move_up(delta_time)
+        if keys[pygame.K_DOWN]:
+            j2.move_down(delta_time)
+        if keys[pygame.K_ESCAPE]:
+            ipclient = None
+            menu_list[0].ouvert = True
+            menu_list[2].ouvert = False
+        tcpsock.listen(10)
+        (clientsocket, (ip, port)) = tcpsock.accept()
+        newthread = ClientThread(ip, port, clientsocket)
+        newthread.start()
+    pygame.display.flip()
+    clock.tick(60)
     pygame.display.flip()
     clock.tick(60)
